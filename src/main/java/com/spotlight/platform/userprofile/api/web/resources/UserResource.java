@@ -18,16 +18,21 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
 
-    private final UserProfileService userProfileService;
+  private final UserProfileService userProfileService;
 
-    @Inject
-    public UserResource(UserProfileService userProfileService) {
-        this.userProfileService = userProfileService;
-    }
+  @Inject
+  public UserResource(UserProfileService userProfileService) {
+    this.userProfileService = userProfileService;
+  }
 
-    @Path("profile")
-    @GET
-    public UserProfile getUserProfile(@Valid @PathParam("userId") UserId userId) {
-        return userProfileService.get(userId);
-    }
+  @Path("profile")
+  @GET
+  public UserProfile getUserProfile(@Valid @PathParam("userId") UserId userId) {
+    return userProfileService.get(userId);
+  }
+
+  @GET
+  public void putUserProfile() {
+    userProfileService.put();
+  }
 }
