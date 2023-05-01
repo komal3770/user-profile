@@ -1,4 +1,4 @@
-# Phoenix Games Publishing Platform
+# Phoenix Games Publishing Platform Backend Developer Trial Task
 
 Our top individual contributor Gabriel Schweinsteinburgberger recently started to develop a new service called User Profile API.
 Unfortunately for us, Gabriel got spontaneously married during his spiritual journey to Tibet. He decided to give up developing software in
@@ -82,6 +82,14 @@ These parts of the application are already implemented:
 * `UserResource` is able to return the profile of the user.
 * `UserProfileDaoInMemory` implements storage of the user profile in memory.
 * There are examples of fixture usage, integration tests, and mocking.
+
+## Your goal
+
+* Add the following components:
+    * Endpoint to accept commands. We also thought about receiving commands in batches.
+    * Logic to process different command types and update the user profile accordingly.
+* Design code in a way that will make adding new command types easy.
+* Maintain a coherent coding style and keep the test coverage level.
 
 You are expected to work in your own Git repository and send us a link to it when you are done. Feel free to commit as often and as
 granularly as you want, we like to see how the progress was.
