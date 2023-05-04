@@ -3,7 +3,6 @@ package com.spotlight.platform.userprofile.api.web.resources;
 import com.spotlight.platform.userprofile.api.core.profile.UserProfileService;
 import com.spotlight.platform.userprofile.api.model.profile.UserProfile;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserId;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -29,10 +28,5 @@ public class UserResource {
   @GET
   public UserProfile getUserProfile(@Valid @PathParam("userId") UserId userId) {
     return userProfileService.get(userId);
-  }
-
-  @GET
-  public void putUserProfile() {
-    userProfileService.put();
   }
 }
