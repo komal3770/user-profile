@@ -1,15 +1,18 @@
 package com.spotlight.platform.userprofile.api.web.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyName;
+import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyValue;
 import java.util.Map;
 
 public class UserCommandRequest {
 
   @JsonProperty String userId;
   @JsonProperty String type;
-  @JsonProperty Map<String, String> properties;
+  @JsonProperty Map<UserProfilePropertyName, UserProfilePropertyValue> properties;
 
-  public UserCommandRequest(String userId, String type, Map<String, String> properties) {
+  public UserCommandRequest(){}
+  public UserCommandRequest(String userId, String type, Map<UserProfilePropertyName, UserProfilePropertyValue> properties) {
     this.userId = userId;
     this.type = type;
     this.properties = properties;
@@ -23,7 +26,7 @@ public class UserCommandRequest {
     return type;
   }
 
-  public Map<String, String> getProperties() {
+  public Map<UserProfilePropertyName, UserProfilePropertyValue> getProperties() {
     return properties;
   }
 }

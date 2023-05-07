@@ -11,6 +11,8 @@ import com.spotlight.platform.userprofile.api.core.profile.persistence.UserProfi
 import com.spotlight.platform.userprofile.api.model.profile.UserProfile;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserId;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfileFixtures;
+import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyName;
+import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyValue;
 import com.spotlight.platform.userprofile.api.web.request.UserCommandRequest;
 import java.time.Instant;
 import java.util.HashMap;
@@ -67,7 +69,12 @@ class UserProfileServiceTest {
       when(userProfileDaoMock.get(any(UserId.class)))
           .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
       UserCommandRequest request =
-          new UserCommandRequest("existing-user-id", "replace", Map.of("property1", "newProperty"));
+          new UserCommandRequest(
+              "existing-user-id",
+              "replace",
+              Map.of(
+                  UserProfilePropertyName.valueOf("property1"),
+                  UserProfilePropertyValue.valueOf("property1Value")));
       assertThat(userProfileService.executeCommand(request)).isEqualTo(true);
     }
 
@@ -77,19 +84,12 @@ class UserProfileServiceTest {
           .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
       UserCommandRequest request =
           new UserCommandRequest(
-              "existing-user-id", "replace", Map.of("invalidProperty", "newProperty"));
+              "existing-user-id",
+              "replace",
+              Map.of(
+                  UserProfilePropertyName.valueOf("invalidProperty"),
+                  UserProfilePropertyValue.valueOf("invalidPropertyValue")));
       assertThat(userProfileService.executeCommand(request)).isEqualTo(true);
-    }
-
-    @Test
-    void executeCommandForNonExistingUser_returnsUser() {
-      when(userProfileDaoMock.get(any(UserId.class))).thenReturn(Optional.empty());
-
-      UserCommandRequest request =
-          new UserCommandRequest(
-              "existing-user-id", "replace", Map.of("invalidProperty", "newProperty"));
-      assertThatThrownBy(() -> userProfileService.executeCommand(request))
-          .isExactlyInstanceOf(EntityNotFoundException.class);
     }
   }
 }

@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-@Path("/commands")
+@Path("/apis")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserCommandResource {
@@ -24,8 +24,10 @@ public class UserCommandResource {
   }
 
   @PUT
+  @Path("/command")
   public Response executeCommand(UserCommandRequest request) {
+    System.out.println("Here==========================================================================================================");
     if (userProfileService.executeCommand(request)) return Response.ok().build();
-    else return Response.status(Status.FORBIDDEN).build();
+    return Response.status(Status.FORBIDDEN).build();
   }
 }

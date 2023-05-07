@@ -19,14 +19,25 @@ public class UserProfileFixtures {
           LAST_UPDATE_TIMESTAMP,
           Map.of(
               UserProfilePropertyName.valueOf("property1"),
-              UserProfilePropertyValue.valueOf("property1Value")));
+              UserProfilePropertyValue.valueOf("property1Value"),
+              UserProfilePropertyName.valueOf("intProperty"),
+              UserProfilePropertyValue.valueOf("100")));
 
   public static final String SERIALIZED_USER_PROFILE =
       FixtureHelpers.fixture("/fixtures/model/profile/userProfile.json");
 
   public static final UserCommandRequest USER_COMMAND_REQUEST =
-      new UserCommandRequest("existing-user-id", "replace", Map.of("property1", "property1Value"));
+      new UserCommandRequest(
+          "existing-user-id",
+          "replace",
+          Map.of(
+              UserProfilePropertyName.valueOf("property1"),
+              UserProfilePropertyValue.valueOf("property1Value")));
 
   public static final String SERIALIZED_USER_COMMAND_REQUEST =
       FixtureHelpers.fixture("/fixtures/web/request/userCommandRequest.json");
+
+  public static final UserCommandRequest USER_COMMAND_REQUEST_INCREMENT =
+      new UserCommandRequest("existing-user-id", "replace", Map.of(UserProfilePropertyName.valueOf("intProperty"),
+          UserProfilePropertyValue.valueOf("10")));
 }

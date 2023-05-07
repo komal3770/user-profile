@@ -7,7 +7,9 @@ import com.spotlight.platform.userprofile.api.model.profile.primitives.UserId;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyName;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyValue;
 import com.spotlight.platform.userprofile.api.web.request.UserCommandRequest;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.inject.Inject;
 
 public class UserProfileService {
@@ -36,20 +38,28 @@ public class UserProfileService {
   public boolean executeCommand(UserCommandRequest commandRequest) {
     UserProfile userProfile = get(UserId.valueOf(commandRequest.getUserId()));
     if (commandRequest.getType().equalsIgnoreCase("replace")) {
+      System.out.println(commandRequest);
+
       Map<UserProfilePropertyName, UserProfilePropertyValue> properties =
           userProfile.userProfileProperties();
+      Map<UserProfilePropertyName, UserProfilePropertyValue> newProperties = new HashMap<>();
       if (properties != null && !properties.isEmpty()) {
-        commandRequest.getProperties().entrySet().stream()
-            .forEach(
-                propEntry -> {
-                  if (properties.containsKey(propEntry.getKey())) {
-                    UserProfilePropertyName propertyName =
-                        UserProfilePropertyName.valueOf(propEntry.getKey());
-                    UserProfilePropertyValue propertyValue =
-                        UserProfilePropertyValue.valueOf(propEntry.getValue());
-                    properties.put(propertyName, propertyValue);
-                  }
-                });
+        System.out.println(commandRequest.getProperties());
+        for (Entry<UserProfilePropertyName, UserProfilePropertyValue> propEntry :
+            commandRequest.getProperties().entrySet()) {
+          System.out.println(
+              "properties key "
+                  + propEntry.getKey()
+                  + " is present "
+                  + properties.containsKey(propEntry.getKey()));
+          if (properties.containsKey(propEntry.getKey())) {
+            newProperties.put(propEntry.getKey(), propEntry.getValue());
+          }
+          newProperties.put(propEntry.getKey(), propEntry.getValue());
+        }
+        UserProfile newUserProfile = new UserProfile(userProfile.userId(), userProfile.latestUpdateTime(), newProperties);
+
+        userProfileDao.put(newUserProfile);
       }
       return true;
     }
