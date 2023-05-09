@@ -28,8 +28,8 @@ public class UserProfileFixtures {
 
   public static final UserCommandRequest USER_COMMAND_REQUEST =
       new UserCommandRequest(
-          "existing-user-id",
-          "replace",
+          USER_ID,
+          CommandEnum.REPLACE,
           Map.of(
               UserProfilePropertyName.valueOf("property1"),
               UserProfilePropertyValue.valueOf("property1Value")));
@@ -38,6 +38,10 @@ public class UserProfileFixtures {
       FixtureHelpers.fixture("/fixtures/web/request/userCommandRequest.json");
 
   public static final UserCommandRequest USER_COMMAND_REQUEST_INCREMENT =
-      new UserCommandRequest("existing-user-id", "replace", Map.of(UserProfilePropertyName.valueOf("intProperty"),
-          UserProfilePropertyValue.valueOf("10")));
+      new UserCommandRequest(
+          USER_ID,
+          CommandEnum.INCREMENT,
+          Map.of(
+              UserProfilePropertyName.valueOf("intProperty"),
+              UserProfilePropertyValue.valueOf("10")));
 }

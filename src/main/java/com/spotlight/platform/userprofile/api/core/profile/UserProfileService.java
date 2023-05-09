@@ -7,11 +7,18 @@ import com.spotlight.platform.userprofile.api.model.profile.primitives.UserId;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyName;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyValue;
 import com.spotlight.platform.userprofile.api.web.request.UserCommandRequest;
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
+/**
+ * @author komal3770
+ *     <p>User service for business logic
+ */
 public class UserProfileService {
   private final UserProfileDao userProfileDao;
 
@@ -20,50 +27,51 @@ public class UserProfileService {
     this.userProfileDao = userProfileDao;
   }
 
+  /**
+   * Get user profile.
+   *
+   * @param userId the user id
+   * @return the user profile
+   */
   public UserProfile get(UserId userId) {
     return userProfileDao.get(userId).orElseThrow(EntityNotFoundException::new);
   }
 
-  public boolean put(UserProfile userProfile) {
-    System.out.println(
-        "Userprofile isPresent() "
-            + userProfileDao.get(userProfile.userId()).isPresent()
-            + " :: "
-            + userProfile.userId());
-    if (userProfileDao.get(userProfile.userId()).isPresent()) return false;
-    userProfileDao.put(userProfile);
-    return true;
-  }
-
+  /**
+   * Execute command for UserProfile class & modify properties based on the type of command.
+   *
+   * @param commandRequest
+   * @return the boolean
+   */
   public boolean executeCommand(UserCommandRequest commandRequest) {
-    UserProfile userProfile = get(UserId.valueOf(commandRequest.getUserId()));
+    UserProfile userProfile = get(commandRequest.getUserId());
+    Map<UserProfilePropertyName, UserProfilePropertyValue> properties =
+        new HashMap<>(userProfile.userProfileProperties());
+
     if (commandRequest.getType().equalsIgnoreCase("replace")) {
-      System.out.println(commandRequest);
-
-      Map<UserProfilePropertyName, UserProfilePropertyValue> properties =
-          userProfile.userProfileProperties();
-      Map<UserProfilePropertyName, UserProfilePropertyValue> newProperties = new HashMap<>();
-      if (properties != null && !properties.isEmpty()) {
-        System.out.println(commandRequest.getProperties());
-        for (Entry<UserProfilePropertyName, UserProfilePropertyValue> propEntry :
-            commandRequest.getProperties().entrySet()) {
-          System.out.println(
-              "properties key "
-                  + propEntry.getKey()
-                  + " is present "
-                  + properties.containsKey(propEntry.getKey()));
-          if (properties.containsKey(propEntry.getKey())) {
-            newProperties.put(propEntry.getKey(), propEntry.getValue());
-          }
-          newProperties.put(propEntry.getKey(), propEntry.getValue());
-        }
-        UserProfile newUserProfile = new UserProfile(userProfile.userId(), userProfile.latestUpdateTime(), newProperties);
-
-        userProfileDao.put(newUserProfile);
-      }
+      properties = replaceCommand(properties);
+      userProfileDao.put(toUserProfile(commandRequest.getUserId(), properties));
       return true;
     }
 
     return false;
+  }
+
+  private UserProfile toUserProfile(
+      UserId userId, Map<UserProfilePropertyName, UserProfilePropertyValue> properties) {
+    return new UserProfile(userId, Instant.now(), properties);
+  }
+
+  private Map<UserProfilePropertyName, UserProfilePropertyValue> replaceCommand(
+      Map<UserProfilePropertyName, UserProfilePropertyValue> properties) {
+    properties
+        .entrySet()
+        .forEach(
+            propEntry -> {
+              if (properties.containsKey(propEntry.getKey())) {
+                properties.put(propEntry.getKey(), propEntry.getValue());
+              }
+            });
+    return properties;
   }
 }

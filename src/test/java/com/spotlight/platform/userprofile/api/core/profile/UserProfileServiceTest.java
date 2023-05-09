@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.spotlight.platform.userprofile.api.core.exceptions.EntityNotFoundException;
 import com.spotlight.platform.userprofile.api.core.profile.persistence.UserProfileDao;
 import com.spotlight.platform.userprofile.api.model.profile.UserProfile;
+import com.spotlight.platform.userprofile.api.model.profile.primitives.CommandEnum;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserId;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfileFixtures;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyName;
@@ -22,14 +23,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+/**
+ * The type User profile service test.
+ */
 class UserProfileServiceTest {
   private final UserProfileDao userProfileDaoMock = mock(UserProfileDao.class);
   private final UserProfileService userProfileService = new UserProfileService(userProfileDaoMock);
 
-  @Nested
+  /**
+   * The type Get.
+   */
+@Nested
   @DisplayName("get")
   class Get {
-    @Test
+    /**
+     * Gets for existing user returns user.
+     */
+@Test
     void getForExistingUser_returnsUser() {
       when(userProfileDaoMock.get(any(UserId.class)))
           .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
@@ -39,7 +49,10 @@ class UserProfileServiceTest {
           .isEqualTo(UserProfileFixtures.USER_PROFILE);
     }
 
-    @Test
+    /**
+     * Gets for non existing user throws exception.
+     */
+@Test
     void getForNonExistingUser_throwsException() {
       when(userProfileDaoMock.get(any(UserId.class))).thenReturn(Optional.empty());
 
@@ -48,30 +61,13 @@ class UserProfileServiceTest {
     }
 
     @Test
-    void putForNonExistingUser_returnsUser() {
-      UserProfile userProfile =
-          new UserProfile(UserId.valueOf("new-user-id"), Instant.now(), new HashMap<>());
-
-      assertThat(userProfileService.put(userProfile)).isEqualTo(true);
-    }
-
-    @Test
-    void putForExistingUser_returnsUser() {
-      when(userProfileDaoMock.get(any(UserId.class)))
-          .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
-      UserProfile userProfile =
-          new UserProfile(UserProfileFixtures.USER_ID, Instant.now(), new HashMap<>());
-      assertThat(userProfileService.put(userProfile)).isEqualTo(false);
-    }
-
-    @Test
     void executeCommandForExistingUser_returnsUser() {
       when(userProfileDaoMock.get(any(UserId.class)))
           .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
       UserCommandRequest request =
           new UserCommandRequest(
-              "existing-user-id",
-              "replace",
+              UserProfileFixtures.USER_ID,
+              CommandEnum.REPLACE,
               Map.of(
                   UserProfilePropertyName.valueOf("property1"),
                   UserProfilePropertyValue.valueOf("property1Value")));
@@ -84,8 +80,8 @@ class UserProfileServiceTest {
           .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
       UserCommandRequest request =
           new UserCommandRequest(
-              "existing-user-id",
-              "replace",
+              UserProfileFixtures.USER_ID,
+              CommandEnum.REPLACE,
               Map.of(
                   UserProfilePropertyName.valueOf("invalidProperty"),
                   UserProfilePropertyValue.valueOf("invalidPropertyValue")));
