@@ -9,12 +9,9 @@ import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfi
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyValue;
 import com.spotlight.platform.userprofile.api.web.request.UserCommandRequest;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import java.util.*;
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 /**
  * @author komal3770
@@ -41,38 +38,44 @@ public class UserProfileService {
   /**
    * Execute command for UserProfile class & modify properties based on the type of command.
    *
-   * @param commandRequest
+   * @param commandRequest request to execute command
    * @return the boolean
    */
-  public boolean executeCommand(UserCommandRequest commandRequest) {
+  public Optional<UserProfile> executeCommand(UserCommandRequest commandRequest) {
     UserProfile userProfile = get(commandRequest.getUserId());
     Map<UserProfilePropertyName, UserProfilePropertyValue> properties =
         new HashMap<>(userProfile.userProfileProperties());
-
-    if (commandRequest.getType() == CommandEnum.REPLACE) {
-      properties = replaceCommand(properties);
-      userProfileDao.put(toUserProfile(commandRequest.getUserId(), properties));
-      return true;
+    for (Map.Entry<UserProfilePropertyName, UserProfilePropertyValue> entry :
+        commandRequest.getProperties().entrySet()) {
+      UserProfilePropertyName key = entry.getKey();
+      UserProfilePropertyValue value = entry.getValue();
+      if (properties.containsKey(key)) {
+        if(commandRequest.getType() == null){
+          throw new BadRequestException("Invalid command type");
+        }
+        if (commandRequest.getType() == CommandEnum.REPLACE) {
+          properties.put(key, value);
+        } else if (commandRequest.getType() == CommandEnum.INCREMENT && value != null) {
+          int val = Integer.parseInt(value.getValue().toString());
+          val = Integer.parseInt(properties.get(key).getValue().toString()) + val;
+          properties.put(key, UserProfilePropertyValue.valueOf(val));
+        } else if (commandRequest.getType() == CommandEnum.COLLECT && value != null) {
+          System.out.println(value.getValue());
+          List<Object> list = new ArrayList<>(List.of(value.getValue()));
+          list.add(properties.get(key).getValue());
+          properties.put(key, UserProfilePropertyValue.valueOf(list));
+        }
+      }
+      else {
+        throw new BadRequestException("Invalid property "+entry.getKey());
+      }
     }
-
-    return false;
+    userProfileDao.put(toUserProfile(commandRequest.getUserId(), properties));
+    return Optional.of(userProfile);
   }
 
   private UserProfile toUserProfile(
       UserId userId, Map<UserProfilePropertyName, UserProfilePropertyValue> properties) {
     return new UserProfile(userId, Instant.now(), properties);
-  }
-
-  private Map<UserProfilePropertyName, UserProfilePropertyValue> replaceCommand(
-      Map<UserProfilePropertyName, UserProfilePropertyValue> properties) {
-    properties
-        .entrySet()
-        .forEach(
-            propEntry -> {
-              if (properties.containsKey(propEntry.getKey())) {
-                properties.put(propEntry.getKey(), propEntry.getValue());
-              }
-            });
-    return properties;
   }
 }

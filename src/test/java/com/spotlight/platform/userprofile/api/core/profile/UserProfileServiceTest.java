@@ -3,8 +3,7 @@ package com.spotlight.platform.userprofile.api.core.profile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.spotlight.platform.userprofile.api.core.exceptions.EntityNotFoundException;
 import com.spotlight.platform.userprofile.api.core.profile.persistence.UserProfileDao;
@@ -23,23 +22,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-/**
- * The type User profile service test.
- */
+import javax.ws.rs.BadRequestException;
+
+/** The type User profile service test. */
 class UserProfileServiceTest {
   private final UserProfileDao userProfileDaoMock = mock(UserProfileDao.class);
   private final UserProfileService userProfileService = new UserProfileService(userProfileDaoMock);
 
-  /**
-   * The type Get.
-   */
-@Nested
+  /** The type Get. */
+  @Nested
   @DisplayName("get")
   class Get {
-    /**
-     * Gets for existing user returns user.
-     */
-@Test
+    /** Gets for existing user returns user. */
+    @Test
     void getForExistingUser_returnsUser() {
       when(userProfileDaoMock.get(any(UserId.class)))
           .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
@@ -49,10 +44,8 @@ class UserProfileServiceTest {
           .isEqualTo(UserProfileFixtures.USER_PROFILE);
     }
 
-    /**
-     * Gets for non existing user throws exception.
-     */
-@Test
+    /** Gets for non existing user throws exception. */
+    @Test
     void getForNonExistingUser_throwsException() {
       when(userProfileDaoMock.get(any(UserId.class))).thenReturn(Optional.empty());
 
@@ -64,6 +57,7 @@ class UserProfileServiceTest {
     void executeCommandForExistingUser_returnsUser() {
       when(userProfileDaoMock.get(any(UserId.class)))
           .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
+
       UserCommandRequest request =
           new UserCommandRequest(
               UserProfileFixtures.USER_ID,
@@ -71,13 +65,14 @@ class UserProfileServiceTest {
               Map.of(
                   UserProfilePropertyName.valueOf("property1"),
                   UserProfilePropertyValue.valueOf("property1Value")));
-      assertThat(userProfileService.executeCommand(request)).isEqualTo(true);
+      assertThat(userProfileService.executeCommand(request)).isNotNull();
     }
 
     @Test
     void executeCommandForNonExistingProperty_returnsUser() {
       when(userProfileDaoMock.get(any(UserId.class)))
           .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
+
       UserCommandRequest request =
           new UserCommandRequest(
               UserProfileFixtures.USER_ID,
@@ -85,7 +80,42 @@ class UserProfileServiceTest {
               Map.of(
                   UserProfilePropertyName.valueOf("invalidProperty"),
                   UserProfilePropertyValue.valueOf("invalidPropertyValue")));
-      assertThat(userProfileService.executeCommand(request)).isEqualTo(true);
+
+      assertThatThrownBy(() -> userProfileService.executeCommand(request))
+          .isExactlyInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    void executeCommandForInvalidCommand_returnsUser() {
+      when(userProfileDaoMock.get(any(UserId.class)))
+          .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
+
+      UserCommandRequest request =
+          new UserCommandRequest(
+              UserProfileFixtures.USER_ID,
+              CommandEnum.getCommand("INVALID"),
+              Map.of(
+                  UserProfilePropertyName.valueOf("invalidProperty"),
+                  UserProfilePropertyValue.valueOf("invalidPropertyValue")));
+
+      assertThatThrownBy(() -> userProfileService.executeCommand(request))
+          .isExactlyInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    void executeCommandForValidCommand_returnsUser() {
+      when(userProfileDaoMock.get(any(UserId.class)))
+              .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
+
+      UserCommandRequest request =
+              new UserCommandRequest(
+                      UserProfileFixtures.USER_ID,
+                      CommandEnum.getCommand("REPLACE"),
+                      Map.of(
+                              UserProfilePropertyName.valueOf("property1"),
+                              UserProfilePropertyValue.valueOf("property1Value")));
+
+      assertThat(userProfileService.executeCommand(request)).isNotNull();
     }
   }
 }

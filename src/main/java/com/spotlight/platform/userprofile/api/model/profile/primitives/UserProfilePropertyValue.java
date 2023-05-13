@@ -17,7 +17,7 @@ public class UserProfilePropertyValue {
   }
 
   @JsonValue
-  protected Object getValue() {
+  public Object getValue() {
     return value;
   }
 
@@ -28,8 +28,7 @@ public class UserProfilePropertyValue {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null || this.getClass() != obj.getClass())
-      return false;
+    if (obj == null || this.getClass() != obj.getClass()) return false;
     return value.equals(((UserProfilePropertyValue) obj).getValue());
   }
 }

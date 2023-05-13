@@ -1,21 +1,25 @@
 package com.spotlight.platform.userprofile.api.web.resources;
 
+import static com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfileFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.spotlight.platform.userprofile.api.core.profile.persistence.UserProfileDao;
-import com.spotlight.platform.userprofile.api.model.profile.primitives.UserId;
-import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfileFixtures;
+import com.spotlight.platform.userprofile.api.model.profile.primitives.*;
 import com.spotlight.platform.userprofile.api.web.UserProfileApiApplication;
+
+import java.util.Map;
 import java.util.Optional;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+
+import com.spotlight.platform.userprofile.api.web.request.UserCommandRequest;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +55,7 @@ class UserCommandResourceTest {
   void beforeEach(UserProfileDao userProfileDao) {
     reset(userProfileDao);
   }
+
   @Nested
   @DisplayName("executeCommands")
   class ExecuteCommands {
@@ -59,23 +64,85 @@ class UserCommandResourceTest {
     @Test
     void testReplaceCommand(ClientSupport client, UserProfileDao userProfileDao) {
       when(userProfileDao.get(any(UserId.class)))
-          .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
+          .thenReturn(Optional.of(USER_PROFILE));
       Entity<?> entity =
-          Entity.entity(UserProfileFixtures.USER_COMMAND_REQUEST, MediaType.APPLICATION_JSON_TYPE);
-      var response = client.targetRest()
-          .path(URL).request().put(entity);
-      assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
+          Entity.entity(USER_COMMAND_REQUEST, MediaType.APPLICATION_JSON_TYPE);
+
+      try (var response = client.targetRest().path(URL).request().put(entity)) {
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
+      }
     }
 
     @Test
     void testIncrementCommand(ClientSupport client, UserProfileDao userProfileDao) {
       when(userProfileDao.get(any(UserId.class)))
-          .thenReturn(Optional.of(UserProfileFixtures.USER_PROFILE));
+          .thenReturn(Optional.of(USER_PROFILE));
       Entity<?> entity =
-          Entity.entity(UserProfileFixtures.USER_COMMAND_REQUEST_INCREMENT, MediaType.APPLICATION_JSON_TYPE);
-      var response = client.targetRest()
-          .path(URL).request().put(entity);
+          Entity.entity(
+              USER_COMMAND_REQUEST_INCREMENT, MediaType.APPLICATION_JSON_TYPE);
+      try (var response = client.targetRest().path(URL).request().put(entity)) {
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
+      }
+    }
+
+    @Test
+    void testCollectCommand(ClientSupport client, UserProfileDao userProfileDao) {
+      when(userProfileDao.get(any(UserId.class)))
+          .thenReturn(Optional.of(USER_PROFILE));
+      Entity<?> entity =
+          Entity.entity(
+              USER_COMMAND_REQUEST_COLLECT, MediaType.APPLICATION_JSON_TYPE);
+      var response = client.targetRest().path(URL).request().put(entity);
       assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
     }
+
+    @Test
+    void testReplaceCommand_NonExistingUser(ClientSupport client, UserProfileDao userProfileDao) {
+      when(userProfileDao.get(any(UserId.class)))
+              .thenReturn(Optional.empty());
+      Entity<?> entity =
+              Entity.entity(USER_COMMAND_REQUEST, MediaType.APPLICATION_JSON_TYPE);
+
+      try (var response = client.targetRest().path(URL).request().put(entity)) {
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND_404);
+      }
+    }
+
+    @Test
+    void testReplaceCommand_InCorrectCommand(ClientSupport client, UserProfileDao userProfileDao) {
+      when(userProfileDao.get(any(UserId.class)))
+              .thenReturn(Optional.of(USER_PROFILE));
+      Entity<?> entity =
+              Entity.entity(USER_COMMAND_REQUEST, MediaType.APPLICATION_JSON_TYPE);
+
+      try (var response = client.targetRest().path(URL).request().put(entity)) {
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST_400);
+      }
+    }
+
+    @Test
+    void testReplaceCommand_ServerError(ClientSupport client, UserProfileDao userProfileDao) {
+      when(userProfileDao.get(any(UserId.class)))
+              .thenReturn(Optional.empty());
+      Entity<?> entity =
+              Entity.entity(USER_COMMAND_REQUEST, MediaType.APPLICATION_JSON_TYPE);
+
+      try (var response = client.targetRest().path(URL).request().put(entity)) {
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST_400);
+      }
+    }
+
+    @Test
+    void executeCommandForInvalidCommand_returnsUser(ClientSupport client, UserProfileDao userProfileDao) {
+      when(userProfileDao.get(any(UserId.class)))
+              .thenReturn(Optional.of(USER_PROFILE));
+
+      Entity<?> entity =
+              Entity.entity(CommandEnum.getCommand("INVALID"), MediaType.APPLICATION_JSON_TYPE);
+      try (var response = client.targetRest().path(URL).request().put(entity)) {
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST_400);
+      }
+    }
+
   }
 }

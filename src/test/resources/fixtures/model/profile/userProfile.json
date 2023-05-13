@@ -3,6 +3,7 @@
   "latestUpdateTime": "2021-06-01T09:16:36.123Z",
   "userProfileProperties": {
     "property1": "property1Value",
-    "intProperty": "100"
+    "intProperty": "100",
+    "collectProperty": ["abc", "xyz"]
   }
 }
