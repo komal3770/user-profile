@@ -109,18 +109,6 @@ class UserCommandResourceTest {
     }
 
     @Test
-    void testReplaceCommand_InCorrectCommand(ClientSupport client, UserProfileDao userProfileDao) {
-      when(userProfileDao.get(any(UserId.class)))
-              .thenReturn(Optional.of(USER_PROFILE));
-      Entity<?> entity =
-              Entity.entity(USER_COMMAND_REQUEST, MediaType.APPLICATION_JSON_TYPE);
-
-      try (var response = client.targetRest().path(URL).request().put(entity)) {
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST_400);
-      }
-    }
-
-    @Test
     void testReplaceCommand_ServerError(ClientSupport client, UserProfileDao userProfileDao) {
       when(userProfileDao.get(any(UserId.class)))
               .thenReturn(Optional.empty());
@@ -128,21 +116,24 @@ class UserCommandResourceTest {
               Entity.entity(USER_COMMAND_REQUEST, MediaType.APPLICATION_JSON_TYPE);
 
       try (var response = client.targetRest().path(URL).request().put(entity)) {
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST_400);
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND_404);
       }
     }
 
     @Test
-    void executeCommandForInvalidCommand_returnsUser(ClientSupport client, UserProfileDao userProfileDao) {
-      when(userProfileDao.get(any(UserId.class)))
-              .thenReturn(Optional.of(USER_PROFILE));
-
-      Entity<?> entity =
-              Entity.entity(CommandEnum.getCommand("INVALID"), MediaType.APPLICATION_JSON_TYPE);
+    void testInvalidCommand_returnsUser(ClientSupport client, UserProfileDao userProfileDao) {
+      when(userProfileDao.get(any(UserId.class))).thenReturn(Optional.of(USER_PROFILE));
+      UserCommandRequest request =
+          new UserCommandRequest(
+              USER_ID,
+              CommandEnum.getCommand("INVALID"),
+              Map.of(
+                  UserProfilePropertyName.valueOf("property1"),
+                  UserProfilePropertyValue.valueOf("property1Value")));
+      Entity<?> entity = Entity.entity(request, MediaType.APPLICATION_JSON_TYPE);
       try (var response = client.targetRest().path(URL).request().put(entity)) {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST_400);
       }
     }
-
   }
 }
