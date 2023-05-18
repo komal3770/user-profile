@@ -8,6 +8,7 @@ import com.spotlight.platform.userprofile.api.model.profile.primitives.UserId;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyName;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyValue;
 import com.spotlight.platform.userprofile.api.web.exceptionmappers.EntityNotFoundExceptionMapper;
+import com.spotlight.platform.userprofile.api.web.exceptionmappers.GlobalExceptionHandler;
 import com.spotlight.platform.userprofile.api.web.healthchecks.PreventStartupWarningHealthCheck;
 import com.spotlight.platform.userprofile.api.web.modules.UserProfileApiModule;
 import io.dropwizard.Application;
@@ -61,6 +62,7 @@ public class UserProfileApiApplication extends Application<UserProfileApiConfigu
 
   private void registerExceptionMappers(Environment environment) {
     environment.jersey().register(getInstance(EntityNotFoundExceptionMapper.class));
+    environment.jersey().register(getInstance(GlobalExceptionHandler.class));
   }
 
   private void loadUserDetails(){

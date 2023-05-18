@@ -1,24 +1,25 @@
 package com.spotlight.platform.userprofile.api.web.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.spotlight.platform.userprofile.api.model.profile.UserProfile;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.CommandEnum;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserId;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyName;
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfilePropertyValue;
-import java.time.Instant;
 import java.util.Map;
+import javax.validation.constraints.NotNull;
 
 public class UserCommandRequest {
 
-  @JsonProperty
-  UserId userId;
-  @JsonProperty
-  CommandEnum type;
-  @JsonProperty Map<UserProfilePropertyName, UserProfilePropertyValue> properties;
+  @JsonProperty @NotNull UserId userId;
+  @JsonProperty CommandEnum type;
+  @JsonProperty @NotNull Map<UserProfilePropertyName, UserProfilePropertyValue> properties;
 
-  public UserCommandRequest(){}
-  public UserCommandRequest(UserId userId, CommandEnum type, Map<UserProfilePropertyName, UserProfilePropertyValue> properties) {
+  public UserCommandRequest() {}
+
+  public UserCommandRequest(
+      UserId userId,
+      CommandEnum type,
+      Map<UserProfilePropertyName, UserProfilePropertyValue> properties) {
     this.userId = userId;
     this.type = type;
     this.properties = properties;
@@ -35,5 +36,4 @@ public class UserCommandRequest {
   public Map<UserProfilePropertyName, UserProfilePropertyValue> getProperties() {
     return properties;
   }
-
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotlight.platform.userprofile.api.core.json.JsonMapper;
 import com.spotlight.platform.userprofile.api.web.exceptionmappers.EntityNotFoundExceptionMapper;
+import com.spotlight.platform.userprofile.api.web.exceptionmappers.GlobalExceptionHandler;
 import io.dropwizard.setup.Environment;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,7 +24,10 @@ class UserProfileApiApplicationTest {
   void exceptionMappers_AreRegistered(Environment environment) {
     assertThat(getRegisteredSingletonClasses(environment))
         .containsOnlyOnce(EntityNotFoundExceptionMapper.class);
+    assertThat(getRegisteredSingletonClasses(environment))
+        .containsOnlyOnce(GlobalExceptionHandler.class);
   }
+
 
   @Test
   void dummyHealthCheck_IsRegistered(Environment environment) {

@@ -4,13 +4,12 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.spotlight.platform.userprofile.api.model.profile.primitives.UserProfileFixtures;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class UserCommandRequestTest {
   @Test
   void serialization_WorksAsExpected() {
-    assertThatJson(UserProfileFixtures.USER_COMMAND_REQUEST)
+    assertThatJson(UserProfileFixtures.USER_COMMAND_REQUEST_REPLACE)
         .isEqualTo(UserProfileFixtures.SERIALIZED_USER_COMMAND_REQUEST);
   }
 

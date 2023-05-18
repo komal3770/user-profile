@@ -11,7 +11,6 @@ public class UserProfileDaoInMemory implements UserProfileDao {
 
   @Override
   public Optional<UserProfile> get(UserId userId) {
-    System.out.println(storage.get(userId));
     return Optional.ofNullable(storage.get(userId));
   }
 
