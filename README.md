@@ -28,7 +28,6 @@ data from the outside world.
   ```
 * `increment` increments the current value in the profile. This command can also take negative
   numbers to decrement the value.
-  * API : /commands/execute
   ```json
     {
       "userId": "de4310e5-b139-441a-99db-77c9c4a5fada",
