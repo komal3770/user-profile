@@ -1,0 +1,7 @@
+{
+  "userId": "existing-user-id",
+  "type": "REPLACE",
+  "properties": {
+    "property1": "property1Value"
+  }
+}
