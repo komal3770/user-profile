@@ -68,8 +68,7 @@ This one api perform bulk operation of above commands based on the given `type` 
     "properties": {
       "battleFought": 500
     }
-  }
-]
+  }]
   ```
 
 ### Add new commands
